@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import { signOut } from 'next-auth/react';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -17,6 +18,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="flex-shrink-0 flex items-center">
                 <h1 className="text-xl font-bold">Fitness Fusion</h1>
               </div>
+            </div>
+            <div className="flex items-center">
+              <button
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800"
+              >
+                Sign Out
+              </button>
             </div>
           </div>
         </div>

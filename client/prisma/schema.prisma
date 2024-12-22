@@ -20,9 +20,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Add fitness-related fields later
+  // Profile fields
   height        Float?    // in cm
   weight        Float?    // in kg
-  fitnessGoal   String?   // e.g., "weight loss", "muscle gain", "maintenance"
-  activityLevel String?   // e.g., "sedentary", "moderate", "active"
+  fitnessGoal   String?   // "weight_loss", "muscle_gain", "maintenance", "general_fitness"
+  activityLevel String?   // "sedentary", "light", "moderate", "very_active"
 }
