@@ -16,9 +16,9 @@ const FeatureCard = ({ title, description, icon, href, gradient }: FeatureCardPr
   return (
     <Link href={href} className="block">
       <motion.div
-        whileHover={{ 
+        whileHover={{
           scale: 1.03,
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1)',
         }}
         whileTap={{ scale: 0.98 }}
         className={`

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Link from 'next/link';
 import './globals.css';
 import { UserCircleIcon, BellIcon } from '@heroicons/react/24/outline';
 
@@ -10,11 +11,7 @@ export const metadata: Metadata = {
   description: 'Your all-in-one fitness tracking solution',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen bg-gray-900 text-white`}>
@@ -28,15 +25,24 @@ export default function RootLayout({
                   </h1>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                  <a href="/" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">
+                  <Link
+                    href="/"
+                    className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium"
+                  >
                     Dashboard
-                  </a>
-                  <a href="/profile" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">
+                  </Link>
+                  <Link
+                    href="/profile"
+                    className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium"
+                  >
                     Profile
-                  </a>
-                  <a href="/settings" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">
+                  </Link>
+                  <Link
+                    href="/settings"
+                    className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium"
+                  >
                     Settings
-                  </a>
+                  </Link>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
@@ -51,9 +57,7 @@ export default function RootLayout({
           </div>
         </nav>
         <main className="pt-16">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
+          <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </body>
     </html>
