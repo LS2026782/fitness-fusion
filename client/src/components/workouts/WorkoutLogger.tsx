@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Exercise, WorkoutSession } from '@prisma/client';
+import { useRouter } from 'next/navigation';
 
 const workoutSchema = z.object({
   name: z.string().min(1, 'Workout name is required'),
@@ -13,10 +14,22 @@ const workoutSchema = z.object({
 
 type WorkoutFormData = z.infer<typeof workoutSchema>;
 
+type ExerciseSet = {
+  reps: number;
+  weight?: number;
+  duration?: number;
+  distance?: number;
+};
+
+type SelectedExercise = Exercise & {
+  sets: ExerciseSet[];
+};
+
 export default function WorkoutLogger() {
-  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
+  const [selectedExercises, setSelectedExercises] = useState<SelectedExercise[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -53,7 +66,7 @@ export default function WorkoutLogger() {
           ...data,
           exercises: selectedExercises.map((exercise) => ({
             exerciseId: exercise.id,
-            sets: [], // Will be filled in the next step
+            sets: exercise.sets,
           })),
         }),
       });
@@ -65,7 +78,7 @@ export default function WorkoutLogger() {
       const workout: WorkoutSession = await response.json();
       reset();
       setSelectedExercises([]);
-      // TODO: Navigate to workout detail page for adding sets
+      router.push('/workouts/history');
     } catch (error) {
       console.error('Failed to save workout:', error);
     } finally {
@@ -73,9 +86,65 @@ export default function WorkoutLogger() {
     }
   };
 
+  const addSet = (exerciseId: string) => {
+    setSelectedExercises((prev) =>
+      prev.map((exercise) => {
+        if (exercise.id === exerciseId) {
+          return {
+            ...exercise,
+            sets: [...exercise.sets, { reps: 0 }],
+          };
+        }
+        return exercise;
+      })
+    );
+  };
+
+  const updateSet = (exerciseId: string, setIndex: number, field: keyof ExerciseSet, value: number) => {
+    setSelectedExercises((prev) =>
+      prev.map((exercise) => {
+        if (exercise.id === exerciseId) {
+          const newSets = [...exercise.sets];
+          newSets[setIndex] = {
+            ...newSets[setIndex],
+            [field]: value,
+          };
+          return {
+            ...exercise,
+            sets: newSets,
+          };
+        }
+        return exercise;
+      })
+    );
+  };
+
+  const removeSet = (exerciseId: string, setIndex: number) => {
+    setSelectedExercises((prev) =>
+      prev.map((exercise) => {
+        if (exercise.id === exerciseId) {
+          const newSets = exercise.sets.filter((_, index) => index !== setIndex);
+          return {
+            ...exercise,
+            sets: newSets,
+          };
+        }
+        return exercise;
+      })
+    );
+  };
+
+  const toggleExercise = (exercise: Exercise) => {
+    if (selectedExercises.some((e) => e.id === exercise.id)) {
+      setSelectedExercises(selectedExercises.filter((e) => e.id !== exercise.id));
+    } else {
+      setSelectedExercises([...selectedExercises, { ...exercise, sets: [] }]);
+    }
+  };
+
   return (
-    <div className="max-w-2xl mx-auto">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <div className="max-w-4xl mx-auto">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">
             Workout Name
@@ -116,13 +185,7 @@ export default function WorkoutLogger() {
                     ? 'border-indigo-500 bg-indigo-50'
                     : 'border-gray-300 hover:border-indigo-500'
                 }`}
-                onClick={() => {
-                  if (selectedExercises.some((e) => e.id === exercise.id)) {
-                    setSelectedExercises(selectedExercises.filter((e) => e.id !== exercise.id));
-                  } else {
-                    setSelectedExercises([...selectedExercises, exercise]);
-                  }
-                }}
+                onClick={() => toggleExercise(exercise)}
               >
                 <h4 className="text-sm font-medium text-gray-900">{exercise.name}</h4>
                 <p className="mt-1 text-xs text-gray-500">{exercise.muscleGroup}</p>
@@ -131,13 +194,65 @@ export default function WorkoutLogger() {
           </div>
         </div>
 
+        {selectedExercises.length > 0 && (
+          <div className="space-y-6">
+            <h3 className="text-lg font-medium text-gray-900">Log Sets</h3>
+            {selectedExercises.map((exercise) => (
+              <div key={exercise.id} className="border rounded-lg p-4">
+                <h4 className="text-md font-medium text-gray-900 mb-2">{exercise.name}</h4>
+                <div className="space-y-2">
+                  {exercise.sets.map((set, setIndex) => (
+                    <div key={setIndex} className="flex items-center gap-4">
+                      <div className="w-8 text-sm text-gray-500">#{setIndex + 1}</div>
+                      <div>
+                        <label className="sr-only">Reps</label>
+                        <input
+                          type="number"
+                          value={set.reps}
+                          onChange={(e) => updateSet(exercise.id, setIndex, 'reps', parseInt(e.target.value))}
+                          className="w-20 rounded-md border-gray-300"
+                          placeholder="Reps"
+                        />
+                      </div>
+                      <div>
+                        <label className="sr-only">Weight (kg)</label>
+                        <input
+                          type="number"
+                          value={set.weight || ''}
+                          onChange={(e) => updateSet(exercise.id, setIndex, 'weight', parseInt(e.target.value))}
+                          className="w-20 rounded-md border-gray-300"
+                          placeholder="Weight"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSet(exercise.id, setIndex)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => addSet(exercise.id)}
+                    className="mt-2 text-sm text-indigo-600 hover:text-indigo-800"
+                  >
+                    + Add Set
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="flex justify-end">
           <button
             type="submit"
             disabled={isLoading || selectedExercises.length === 0}
             className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Creating...' : 'Start Workout'}
+            {isLoading ? 'Saving...' : 'Save Workout'}
           </button>
         </div>
       </form>

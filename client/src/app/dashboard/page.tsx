@@ -17,7 +17,7 @@ export default async function DashboardPage() {
           title="Workout Tracking"
           description="Log and track your workouts"
           icon="📊"
-          href="/workouts"
+          href="/workouts/log"
           gradient="bg-gradient-to-br from-purple-600 to-blue-500"
         />
         <FeatureCard
@@ -31,7 +31,7 @@ export default async function DashboardPage() {
           title="Progress Stats"
           description="View your fitness progress"
           icon="📈"
-          href="/stats"
+          href="/progress"
           gradient="bg-gradient-to-br from-orange-500 to-pink-500"
         />
       </div>

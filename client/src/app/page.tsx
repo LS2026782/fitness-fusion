@@ -16,7 +16,7 @@ const features = [
     title: 'Fitness Tracking',
     description: 'Log workouts, track progress, and achieve your fitness goals',
     icon: <FireIcon className="w-full h-full" />,
-    href: '/fitness',
+    href: '/workouts/log',
     gradient: 'bg-gradient-to-br from-orange-500 to-pink-500',
   },
   {
@@ -51,7 +51,7 @@ const features = [
     title: 'Analytics',
     description: 'View detailed insights and progress reports',
     icon: <ChartBarIcon className="w-full h-full" />,
-    href: '/analytics',
+    href: '/progress',
     gradient: 'bg-gradient-to-br from-yellow-500 to-amber-500',
   },
 ];
