@@ -25,4 +25,57 @@ model User {
   weight        Float?    // in kg
   fitnessGoal   String?   // "weight_loss", "muscle_gain", "maintenance", "general_fitness"
   activityLevel String?   // "sedentary", "light", "moderate", "very_active"
+
+  // Relationships
+  workouts      WorkoutSession[]
+}
+
+model Exercise {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  category    String   // "strength", "cardio", "flexibility", etc.
+  muscleGroup String   // "chest", "back", "legs", etc.
+  equipment   String?  // Required equipment, if any
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  workoutExercises WorkoutExercise[]
+}
+
+model WorkoutSession {
+  id          String   @id @default(cuid())
+  name        String?
+  date        DateTime @default(now())
+  duration    Int?     // in minutes
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  userId      String
+  user        User              @relation(fields: [userId], references: [id])
+  exercises   WorkoutExercise[]
+}
+
+model WorkoutExercise {
+  id              String   @id @default(cuid())
+  sets            Int
+  reps            Int?
+  weight          Float?   // in kg
+  duration        Int?     // in seconds (for timed exercises)
+  distance        Float?   // in meters (for cardio)
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relationships
+  workoutId       String
+  workout         WorkoutSession @relation(fields: [workoutId], references: [id])
+  exerciseId      String
+  exercise        Exercise       @relation(fields: [exerciseId], references: [id])
+
+  @@index([workoutId])
+  @@index([exerciseId])
 }
